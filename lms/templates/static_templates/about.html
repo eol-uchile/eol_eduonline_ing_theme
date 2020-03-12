@@ -1,0 +1,19 @@
+<%page expression_filter="h"/>
+<%! from django.utils.translation import ugettext as _ %>
+<%inherit file="../main.html" />
+
+<%block name="pagetitle">${_("Nosotros")}</%block>
+
+<main id="main" aria-label="Content" tabindex="-1">
+    <section class="container about">
+        <h1>
+            <%block name="pageheader">${page_header or _("Nosotros")}</%block>
+        </h1>
+        ##<p>
+            <%block name="pagecontent">
+	    <p>La Escuela de Educación Continua tiene como misión principal contribuir a la formación permanente de profesionales del ámbito de la ingeniería y las ciencias, a través de la ejecución de diplomados y cursos diseñados para fortalecer sus competencias en las disciplinas  impartidas por la Facultad de Ciencias Físicas y Matemáticas de la Universidad de Chile.</p>
+            <p>Los programas académicos son ofrecidos de forma presencial, semipresencial o a distancia, modalidad esta última que es impartida a través de una plataforma de educación superior digital de última generación.</p>
+	    </%block>
+        ##</p>
+    </section>
+</main>
