@@ -1,0 +1,265 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from django.utils.translation import ugettext as _
+    from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+    from openedx.core.djangolib.js_utils import dump_js_escaped_json
+    from urllib.parse import urlencode
+    from django.urls import reverse
+%>
+<%namespace name='static' file='/static_content.html'/>
+
+<%inherit file="../main.html" />
+
+<%block name="pagetitle">${_("Sign in or Register")}</%block>
+
+<%block name="js_extra">
+    <%static:require_module module_name="js/student_account/logistration_factory" class_name="LogistrationFactory">
+        var options = ${data | n, dump_js_escaped_json};
+        LogistrationFactory(options);
+        if ('newrelic' in window) {
+            newrelic.finished();
+            // Because of a New Relic bug, the finished() event doesn't show up
+            // in Insights, so we have to make a new PageAction that is basically
+            // the same thing. We still want newrelic.finished() for session
+            // traces though.
+            newrelic.addPageAction('xfinished');
+        }
+    </%static:require_module>
+    % if configuration_helpers.get_value('DISPLAY_TOS_IN_MODAL_ON_REGISTRATION_PAGE', False):
+    <script type="text/javascript" src="${static.url('js/student_account/tos_modal.js')}"></script>
+    % endif
+</%block>
+
+<%block name="header_extras">
+    % for template_name in ["account", "access", "form_field", "register", "institution_login", "institution_register", "password_reset", "hinted_login"]:
+        <script type="text/template" id="${template_name}-tpl">
+            <%static:include path="student_account/${template_name}.underscore" />
+        </script>
+    % endfor
+    <script type="text/template" id="login-tpl">
+        <%static:include path="student_account/login2.underscore" />
+    </script>
+</%block>
+
+<div class="section-bkg-wrapper">
+<style>
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+    a {
+        color: #007bff;
+        text-decoration: none;
+        background-color: transparent;
+    }
+    .eol-bg {
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+        background-size: cover;
+    }    
+    .pt-0, .py-0 {
+        padding-top: 0 !important;
+    }
+    .mt-0, .my-0 {
+        margin-top: 0 !important;
+    }
+    .w-100 {
+        width: 100% !important;
+    }
+    article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
+        display: block;
+    }
+    .pl-2, .px-2 {
+        padding-left: 0.5rem !important;
+    }
+    .pr-2, .px-2 {
+        padding-right: 0.5rem !important;
+    }
+    
+    }
+    
+    .row {
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+        margin-right: -15px;
+        margin-left: -15px;
+    }
+    .row {
+        margin-left: 0px;
+        margin-right: 0px;
+    }
+    .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12, .col, .col-auto, .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm, .col-sm-auto, .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12, .col-md, .col-md-auto, .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg, .col-lg-auto, .col-xl-1, .col-xl-2, .col-xl-3, .col-xl-4, .col-xl-5, .col-xl-6, .col-xl-7, .col-xl-8, .col-xl-9, .col-xl-10, .col-xl-11, .col-xl-12, .col-xl, .col-xl-auto {
+        position: relative;
+        width: 100%;
+        padding-right: 15px;
+        padding-left: 15px;
+    }
+    .col-11 {
+        -ms-flex: 0 0 91.666667%;
+        flex: 0 0 91.666667%;
+        max-width: 91.666667%;
+    }
+    .bg-white {
+        background-color: #fff !important;
+    }
+    @media (min-width: 576px) {
+        .container, .container-sm {
+        max-width: 540px;
+        }
+    }
+    
+    @media (min-width: 768px) {
+        .container, .container-sm, .container-md {
+        max-width: 720px;
+        }
+    }
+    
+    @media (min-width: 992px) {
+        .container, .container-sm, .container-md, .container-lg {
+        max-width: 960px;
+        }
+    }
+    
+    @media (min-width: 1200px) {
+        .container, .container-sm, .container-md, .container-lg, .container-xl {
+        max-width: 1140px;
+        }
+    }
+    @media (min-width: 768px){
+        .col-md-8 {
+            -ms-flex: 0 0 66.666667%;
+            flex: 0 0 66.666667%;
+            max-width: 66.666667%;
+        }
+    }
+    @media (min-width: 992px){
+        .col-lg-6 {
+            -ms-flex: 0 0 50%;
+            flex: 0 0 50%;
+            max-width: 50%;
+        }
+    }
+    .rounded-lg {
+        border-radius: 0.3rem !important;
+    }
+    .shadow-lg {
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+    }
+    .mb-5, .my-5 {
+        margin-bottom: 3rem !important;
+    }
+    .pt-4, .py-4 {
+        padding-top: 1.5rem !important;
+    }
+    .pb-4, .py-4 {
+        padding-bottom: 1.5rem !important;
+    }
+    .pr-5, .px-5 {
+        padding-right: 3rem !important;
+    }
+    .pl-5, .px-5 {
+        padding-left: 3rem !important;
+    }
+    .mr-auto, .mx-auto {
+        margin-right: auto !important;
+    }
+    .ml-auto, .mx-auto {
+        margin-left: auto !important;
+    }
+    #eol-login .login-card {
+        background-color: #ffffffbf !important;
+    }
+    .container {
+        width: 100%;
+        padding-right: 15px;
+        padding-left: 15px;
+        margin-right: auto;
+        margin-left: auto;
+    }
+    .login-button2{
+        background:url("${static.url('eduonline-ing/images/buttons/login_button_bblue.jpg')}") no-repeat;
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        height: 70px;
+    }
+    .login-button3{
+        background:url("${static.url('eduonline-ing/images/buttons/login_button_eol_light_bblue.jpg')}") no-repeat;
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        height: 70px;
+    }
+    #content.main-container {
+        padding: 0px !important;
+        margin: 0px !important;
+    }
+    .pb-2, .py-2 {
+        padding-bottom: 0.5rem !important;
+    }
+    .mb-4, .my-4 {
+        margin-bottom: 1.5rem !important;
+    }
+    .ml-5, .mx-5 {
+        margin-left: 3rem !important;
+    }
+    .mr-5, .mx-5 {
+        margin-right: 3rem !important;
+    }
+    .mb-3, .my-3 {
+        margin-bottom: 1rem !important;
+    }
+    .mt-3, .my-3 {
+        margin-top: 1rem !important;
+    }
+    #eol-login span.login-header, .wrapper-header-courses .eol-header-courses {
+        border-bottom: .15rem solid #009bdd;
+        color: #009bdd;
+        font-weight: 500;
+        line-height: 1.2;
+        font-size: 1.8em !important;
+        display: block;
+        padding-bottom: 0.5em;
+    }
+    #eol-login .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #009bdd;
+        font-size: 1.5em;
+    }
+    #eol-login .separator::before {
+        margin-right: .25em;
+    }
+    #eol-login .separator::before, .separator::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #009bdd;
+    }
+</style>
+    <main id="eol-login" aria-label="Content" tabindex="-1" class="eol-bg w-100 mx-auto mt-0 pt-0" style="min-height: 85vh; background-image: url(${static.url('eduonline-ing/images/bg-eol.png')});">
+        
+        <div style="visibility: hidden;" id="url_next">${ reverse('uchileedxlogin-login:login') | h }?${urlencode({'next':login_redirect_url})}</div>
+        
+        <div class="container eol-content-container px-2 mx-auto">
+            <div class="row">
+                <div id="content-container" class="login-card col-11 col-md-8 col-lg-6 mx-auto shadow-lg px-5 py-4 mb-5 bg-white rounded-lg">
+                        % if enable_enterprise_sidebar:
+                            <%include file="enterprise_sidebar.html" />
+                            <%
+                                border_class = 'border-left'
+                            %>
+                        % else:
+                            <%
+                                border_class = ''
+                            %>
+                        % endif
+                        <div id="login-and-registration-container" class="login-register ${border_class}" style="background: none;"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
